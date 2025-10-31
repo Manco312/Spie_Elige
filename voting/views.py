@@ -62,36 +62,43 @@ def vote_page(request, election_id):
     voter_id = request.session.get('voter_id')
     if not voter_id:
         return redirect('landing')
+
     voter = get_object_or_404(Voter, id=voter_id)
     election = get_object_or_404(Election, id=election_id)
+
     # verificar que no haya votado ya en esta elección
     if Vote.objects.filter(voter=voter, election=election).exists():
         messages.error(request, "Ya hiciste tu voto en esta elección.")
         return redirect('voter_dashboard')
-    # Si votó delegante no puede votar: esto se chequeó en landing, pero doble verificación
-    if Delegation.objects.filter(from_voter=voter).exists():
-        messages.error(request, "Usted ha cedido su voto y no está habilitado para votar.")
-        return redirect('landing')
-    # calcular peso (1 + cantidad de delegaciones recibidas)
+
+    # calcular cantidad de votos permitidos
     delegations_received = Delegation.objects.filter(to_voter=voter).count()
-    weight = 1 + delegations_received
-    if request.method == 'POST':
-        option_id = request.POST.get('option')
-        if not option_id:
-            messages.error(request, "Selecciona una opción.")
-            return redirect('vote_page', election_id=election.id)
-        option = get_object_or_404(Option, id=option_id, election=election)
-        Vote.objects.create(voter=voter, election=election, option=option, weight=weight)
-        messages.success(request, f"Voto registrado (valor: {weight}). ¡Gracias por participar!")
-        # opcional: remover session voter_id para forzar re-login (pero mantendremos)
-        return redirect('voter_dashboard')
+    vote_count = 1 + delegations_received  # su voto más los delegados
     options = election.options.all()
+
+    if request.method == 'POST':
+        # iterar sobre todos los votos esperados
+        votes_to_create = []
+        for i in range(1, vote_count + 1):
+            option_id = request.POST.get(f'option_{i}')
+            if not option_id:
+                messages.error(request, f"Debes seleccionar una opción para el voto #{i}.")
+                return redirect('vote_page', election_id=election.id)
+            option = get_object_or_404(Option, id=option_id, election=election)
+            votes_to_create.append(option)
+
+        # guardar todos los votos
+        for opt in votes_to_create:
+            Vote.objects.create(voter=voter, election=election, option=opt, weight=1)
+
+        messages.success(request, f"Se registraron {vote_count} votos correctamente. ¡Gracias por participar!")
+        return redirect('voter_dashboard')
+
     return render(request, 'voting/vote_page.html', {
         'voter': voter,
         'election': election,
         'options': options,
-        'weight': weight,
-        'delegations_received': delegations_received,
+        'vote_count': vote_count,
     })
 
 # ---------------- ADMIN (LOGIN FIJO) ----------------

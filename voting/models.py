@@ -40,8 +40,8 @@ class Vote(models.Model):
     weight = models.PositiveIntegerField(default=1)  # account for delegations received
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('voter', 'election')  # un voto por votante por elección
+    #class Meta:
+        #unique_together = ('voter', 'election')  # un voto por votante por elección
 
     def __str__(self):
         return f"{self.voter} votó {self.option} (x{self.weight})"

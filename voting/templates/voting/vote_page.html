@@ -1,21 +1,28 @@
 {% extends 'voting/base.html' %}
+{% load custom_filters %}
 {% block content %}
 <div class="card">
   <h2>Votar — {{ election.titulo }}</h2>
   <p>{{ election.descripcion }}</p>
-  <p>Tu voto tendrá valor: <strong>{{ weight }}</strong></p>
+  <p>Tienes derecho a <strong>{{ vote_count }}</strong> voto{% if vote_count > 1 %}s{% endif %} (por delegaciones recibidas).</p>
 
   <form method="post">
     {% csrf_token %}
-    {% for opt in options %}
-      <div class="option-row">
-        <input type="radio" id="opt{{ forloop.counter }}" name="option" value="{{ opt.id }}" required>
-        <label for="opt{{ forloop.counter }}">{{ opt.texto }}</label>
-      </div>
+    {% for i in 1|to:vote_count %}
+      <h5 class="mt-3">Voto #{{ i }}</h5>
+      {% for opt in options %}
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="opt{{ i }}_{{ forloop.counter }}" 
+                 name="option_{{ i }}" value="{{ opt.id }}" required>
+          <label class="form-check-label" for="opt{{ i }}_{{ forloop.counter }}">
+            {{ opt.texto }}
+          </label>
+        </div>
+      {% endfor %}
     {% endfor %}
-    <button class="btn-primary" type="submit">Votar</button>
+    <button class="btn btn-danger mt-3" type="submit">Enviar votos</button>
   </form>
 
-  <a href="{% url 'voter_dashboard' %}" class="btn-link">Volver</a>
+  <a href="{% url 'voter_dashboard' %}" class="btn btn-link">Volver</a>
 </div>
 {% endblock %}
