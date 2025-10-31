@@ -1,0 +1,21 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Votar — {{ election.titulo }}</h2>
+  <p>{{ election.descripcion }}</p>
+  <p>Tu voto tendrá valor: <strong>{{ weight }}</strong></p>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for opt in options %}
+      <div class="option-row">
+        <input type="radio" id="opt{{ forloop.counter }}" name="option" value="{{ opt.id }}" required>
+        <label for="opt{{ forloop.counter }}">{{ opt.texto }}</label>
+      </div>
+    {% endfor %}
+    <button class="btn-primary" type="submit">Votar</button>
+  </form>
+
+  <a href="{% url 'voter_dashboard' %}" class="btn-link">Volver</a>
+</div>
+{% endblock %}

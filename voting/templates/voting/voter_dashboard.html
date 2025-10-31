@@ -1,0 +1,23 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Hola, {{ voter.nombre }}</h2>
+  <p>Cédula: {{ voter.cedula }}</p>
+  <p>Tu voto tiene valor: <strong>{{ weight }}</strong> {% if delegations_received %}(recibiste {{ delegations_received }} delegación(es)){% endif %}</p>
+
+  {% if elections %}
+    <h3>Elecciones disponibles</h3>
+    <ul class="list-elections">
+      {% for e in elections %}
+        <li>
+          <strong>{{ e.titulo }}</strong>
+          <a class="btn-small" href="{% url 'vote_page' e.id %}">Votar</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No hay elecciones disponibles o ya votaste en todas.</p>
+  {% endif %}
+  <a href="{% url 'landing' %}" class="btn-link">Cerrar sesión</a>
+</div>
+{% endblock %}

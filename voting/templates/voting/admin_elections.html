@@ -1,0 +1,55 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Elecciones</h2>
+
+  <form method="post" action="{% url 'admin_add_election' %}">
+    {% csrf_token %}
+    <fieldset>
+      <legend>Crear elección</legend>
+      {{ addition_form.as_p }}
+      <button type="submit" class="btn-primary">Crear</button>
+    </fieldset>
+  </form>
+
+  <h3>Agregar opción a una elección</h3>
+
+  <form id="optionForm" method="post">
+    {% csrf_token %}
+    <label>Elección</label>
+    <select id="electionSelect" name="election_id" required>
+      <option value="">--</option>
+      {% for e in elections %}
+        <option value="{{ e.id }}">{{ e.titulo }}</option>
+      {% endfor %}
+    </select>
+    {{ option_form.as_p }}
+    <button type="submit" class="btn-primary">Agregar opción</button>
+  </form>
+
+  <h3>Lista de elecciones</h3>
+  <ul>
+    {% for e in elections %}
+      <li>{{ e.titulo }} — {{ e.descripcion }} ({{ e.options.count }} opciones)</li>
+    {% empty %}
+      <li>No hay elecciones aún</li>
+    {% endfor %}
+  </ul>
+
+  <a href="{% url 'admin_panel' %}" class="btn-link">Volver</a>
+</div>
+
+<script>
+  // Cuando se envía el formulario, cambia el action según la elección seleccionada
+  document.getElementById('optionForm').addEventListener('submit', function(event) {
+    const select = document.getElementById('electionSelect');
+    const elecId = select.value;
+    if (!elecId) {
+      event.preventDefault();
+      alert('Selecciona una elección antes de continuar.');
+      return;
+    }
+    this.action = `/admin/elections/${elecId}/add_option/`;  // construye la URL dinámica
+  });
+</script>
+{% endblock %}

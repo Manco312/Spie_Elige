@@ -1,0 +1,45 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Delegaciones</h2>
+
+  <form method="post" action="{% url 'admin_add_delegation' %}">
+    {% csrf_token %}
+    <fieldset>
+      <legend>Registrar delegación (from -> to)</legend>
+      <label>From (cede su voto)</label>
+      <select name="from_voter" required>
+        <option value="">--</option>
+        {% for v in voters %}
+          <option value="{{ v.id }}">{{ v.nombre }} ({{ v.cedula }})</option>
+        {% endfor %}
+      </select>
+      <label>To (recibe voto)</label>
+      <select name="to_voter" required>
+        <option value="">--</option>
+        {% for v in voters %}
+          <option value="{{ v.id }}">{{ v.nombre }} ({{ v.cedula }})</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-primary">Registrar</button>
+    </fieldset>
+  </form>
+
+  <h3>Lista de delegaciones</h3>
+  <table class="table">
+    <thead><tr><th>From</th><th>To</th><th>Fecha</th><th>Acciones</th></tr></thead>
+    <tbody>
+      {% for d in delegs %}
+      <tr>
+        <td>{{ d.from_voter.nombre }} ({{ d.from_voter.cedula }})</td>
+        <td>{{ d.to_voter.nombre }} ({{ d.to_voter.cedula }})</td>
+        <td>{{ d.created_at }}</td>
+        <td><a class="btn-small btn-danger" href="{% url 'admin_delete_delegation' d.id %}">Eliminar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <a href="{% url 'admin_panel' %}" class="btn-link">Volver</a>
+</div>
+{% endblock %}

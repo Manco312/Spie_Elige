@@ -1,0 +1,33 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Votantes habilitados</h2>
+
+  <form method="post" action="{% url 'admin_add_voter' %}">
+    {% csrf_token %}
+    <fieldset>
+      <legend>Agregar votante</legend>
+      {{ form.as_p }}
+      <button type="submit" class="btn-primary">Agregar</button>
+    </fieldset>
+  </form>
+
+  <h3>Lista</h3>
+  <table class="table">
+    <thead><tr><th>Nombre</th><th>Cédula</th><th>Activo</th><th>Acciones</th></tr></thead>
+    <tbody>
+      {% for v in voters %}
+      <tr>
+        <td>{{ v.nombre }}</td>
+        <td>{{ v.cedula }}</td>
+        <td>{{ v.active }}</td>
+        <td>
+          <a class="btn-small btn-danger" href="{% url 'admin_delete_voter' v.id %}">Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'admin_panel' %}" class="btn-link">Volver</a>
+</div>
+{% endblock %}

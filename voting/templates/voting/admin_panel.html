@@ -1,0 +1,20 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Panel de Administración</h2>
+  <ul class="admin-stats">
+    <li>Votantes: {{ total_voters }}</li>
+    <li>Elecciones: {{ total_elections }}</li>
+    <li>Delegaciones: {{ total_delegations }}</li>
+    <li>Votos registrados: {{ total_votes }}</li>
+  </ul>
+
+  <div class="admin-links">
+    <a href="{% url 'admin_voters' %}" class="btn-small">Gestionar votantes</a>
+    <a href="{% url 'admin_delegations' %}" class="btn-small">Gestionar delegaciones</a>
+    <a href="{% url 'admin_elections' %}" class="btn-small">Gestionar elecciones</a>
+    <a href="{% url 'admin_results' %}" class="btn-small">Ver resultados</a>
+    <a href="{% url 'admin_logout' %}" class="btn-link">Cerrar sesión</a>
+  </div>
+</div>
+{% endblock %}

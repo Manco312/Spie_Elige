@@ -1,0 +1,25 @@
+{% extends 'voting/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Resultados</h2>
+  {% for r in results %}
+    <section class="result-block">
+      <h3>{{ r.election.titulo }}</h3>
+      <table class="table">
+        <thead><tr><th>Opción</th><th>Votos (ponderados)</th></tr></thead>
+        <tbody>
+          {% for o in r.opt_results %}
+            <tr>
+              <td>{{ o.option.texto }}</td>
+              <td>{{ o.total }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  {% empty %}
+    <p>No hay elecciones registradas.</p>
+  {% endfor %}
+  <a href="{% url 'admin_panel' %}" class="btn-link">Volver</a>
+</div>
+{% endblock %}
