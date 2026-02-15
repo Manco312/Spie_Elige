@@ -119,14 +119,36 @@ export async function createDelegation(formData: FormData) {
     return { error: "Este votante ya tiene una delegacion activa." };
   }
 
-  await prisma.delegation.create({
-    data: { fromVoterId, toVoterId },
-  });
+  // Create delegation and deactivate the delegating voter (they can no longer vote directly)
+  await prisma.$transaction([
+    prisma.delegation.create({
+      data: { fromVoterId, toVoterId },
+    }),
+    prisma.voter.update({
+      where: { id: fromVoterId },
+      data: { active: false },
+    }),
+  ]);
 
   redirect("/admin-panel/delegations");
 }
 
 export async function deleteDelegation(delegationId: number) {
-  await prisma.delegation.delete({ where: { id: delegationId } });
+  // Find the delegation to get the fromVoterId before deleting
+  const delegation = await prisma.delegation.findUnique({
+    where: { id: delegationId },
+  });
+
+  if (!delegation) return { error: "Delegacion no encontrada." };
+
+  // Delete delegation and re-activate the voter
+  await prisma.$transaction([
+    prisma.delegation.delete({ where: { id: delegationId } }),
+    prisma.voter.update({
+      where: { id: delegation.fromVoterId },
+      data: { active: true },
+    }),
+  ]);
+
   redirect("/admin-panel/delegations");
 }
