@@ -1,0 +1,68 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Voter {
+  id           Int          @id @default(autoincrement())
+  nombre       String
+  cedula       String       @unique
+  active       Boolean      @default(true)
+  delegatedOut Delegation?  @relation("DelegatedOut")
+  delegatedIn  Delegation[] @relation("DelegatedIn")
+  votes        Vote[]
+  createdAt    DateTime     @default(now()) @map("created_at")
+
+  @@map("voters")
+}
+
+model Election {
+  id            Int      @id @default(autoincrement())
+  titulo        String
+  descripcion   String   @default("")
+  fechaCreacion DateTime @default(now()) @map("fecha_creacion")
+  options       Option[]
+  votes         Vote[]
+
+  @@map("elections")
+}
+
+model Option {
+  id         Int      @id @default(autoincrement())
+  texto      String
+  election   Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  electionId Int      @map("election_id")
+  votes      Vote[]
+
+  @@map("options")
+}
+
+model Delegation {
+  id          Int      @id @default(autoincrement())
+  fromVoter   Voter    @relation("DelegatedOut", fields: [fromVoterId], references: [id], onDelete: Cascade)
+  fromVoterId Int      @unique @map("from_voter_id")
+  toVoter     Voter    @relation("DelegatedIn", fields: [toVoterId], references: [id], onDelete: Cascade)
+  toVoterId   Int      @map("to_voter_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("delegations")
+}
+
+model Vote {
+  id         Int      @id @default(autoincrement())
+  voter      Voter    @relation(fields: [voterId], references: [id], onDelete: Cascade)
+  voterId    Int      @map("voter_id")
+  election   Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  electionId Int      @map("election_id")
+  option     Option   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId   Int      @map("option_id")
+  weight     Int      @default(1)
+  timestamp  DateTime @default(now())
+
+  @@map("votes")
+}
